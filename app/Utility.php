@@ -32,7 +32,7 @@ class Utility
       public function getRateByCurrency($currency)
       {
             $currencyRate = json_decode(
-                $this->getCurrencyRate(self::CURRENCY_RATE_ENDPOINT),
+                $this->getCurrencyRate(self::CURRENCY_RATE_ENDPOINT)->getRate(),
                 true
             );
 
@@ -72,6 +72,6 @@ class Utility
        */
       public function getCurrencyRate($url)
       {
-            return (new CurrencyRate($url))->getRate();
+            return new CurrencyRate($url);
       }
 }
