@@ -4,7 +4,9 @@
 namespace TrxCommission;
 
 
-class CurrencyRate
+use TrxCommission\contracts\Rateable;
+
+class CurrencyRate implements Rateable
 {
       use Helper;
 

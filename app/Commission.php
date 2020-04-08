@@ -2,7 +2,9 @@
 
 namespace TrxCommission;
 
-class Commission extends Utility
+use TrxCommission\contracts\Commissionable;
+
+class Commission extends Utility implements Commissionable
 {
       use Helper;
 
