@@ -6,6 +6,11 @@ namespace TrxCommission;
 
 class Utility
 {
+      use Helper;
+
+      const BIN_LIST_ENDPOINT = 'https://lookup.binlist.net/';
+      const CURRENCY_RATE_ENDPOINT = 'https://api.exchangeratesapi.io/latest';
+
       /**
        * Get countries code
        *
@@ -18,13 +23,40 @@ class Utility
       }
 
       /**
-       * Get remote data form a URL
+       * Get Currency Rate
        *
-       * @param string $url
+       * @param $currency
+       * @return mixed
+       * @throws \Exception
+       */
+      public function getRateByCurrency($currency)
+      {
+            $currencyRate = json_decode(
+                $this->getCurrencyRate(self::CURRENCY_RATE_ENDPOINT),
+                true
+            );
+
+            if( ! array_key_exists('rates', $currencyRate) ) {
+                  throw new \Exception('Invalid currency rate');
+            }
+
+            $rate = $currencyRate['rates'];
+
+            if( array_key_exists(strtoupper($currency), $rate) ) {
+                  return $rate[strtoupper($currency)];
+            }
+
+            throw new \Exception('Invalid currency that is not listed.');
+      }
+
+      /**
+       * Get Currency Rate
+       *
+       * @param $url
        * @return false|string
        */
-      public function getRemoteData($url = '')
+      public function getCurrencyRate($url)
       {
-            return file_get_contents($url);
+            return (new CurrencyRate($url))->getRate();
       }
 }

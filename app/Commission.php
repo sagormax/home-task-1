@@ -1,8 +1,11 @@
 <?php
+
 namespace TrxCommission;
 
 class Commission extends Utility
 {
+      use Helper;
+
       const BIN_LIST_ENDPOINT = 'https://lookup.binlist.net/';
 
       private $cardBin;
