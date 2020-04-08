@@ -1,7 +1,7 @@
 <?php
 namespace TrxCommission;
 
-class Commission
+class Commission extends Utility
 {
       const BIN_LIST_ENDPOINT = 'https://lookup.binlist.net/';
 
@@ -32,16 +32,5 @@ class Commission
             }
 
             throw new \Exception('Invalid payload for getting BIN result.');
-      }
-
-      /**
-       * Get remote data form a URL
-       *
-       * @param string $url
-       * @return false|string
-       */
-      private function getRemoteData($url = '')
-      {
-            return file_get_contents($url);
       }
 }
