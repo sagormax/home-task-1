@@ -3,23 +3,30 @@
 namespace TrxCommission;
 
 use TrxCommission\contracts\Commissionable;
+use TrxCommission\contracts\Rateable;
 
 class Commission extends Utility implements Commissionable
 {
       use Helper;
 
-      private $EURate;
+      private $euRate;
       private $nonEURate;
+      private $countries;
+      private $currencyRate;
       private $transactionPayload;
 
       /**
        * Commission constructor.
        *
        * @param array $payload
+       * @param Rateable $rateable
+       * @param Country $countries
        */
-      public function __construct(Array $payload)
+      public function __construct(Array $payload, Rateable $rateable, Country $countries)
       {
-            $this->transactionPayload = $payload;
+            $this->currencyRate           = $rateable;
+            $this->countries              = $countries;
+            $this->transactionPayload     = $payload;
       }
 
       /**
@@ -27,9 +34,9 @@ class Commission extends Utility implements Commissionable
        *
        * @param $rate
        */
-      public function setEURate($rate)
+      public function setEuRate($rate)
       {
-            $this->EURate = $rate;
+            $this->euRate = $rate;
       }
 
       /**
@@ -45,11 +52,10 @@ class Commission extends Utility implements Commissionable
       /**
        * Generate Commission
        *
-       * @param $json
        * @return mixed
        * @throws \Exception
        */
-      public function generateCommission($json)
+      public function generate()
       {
             if(
                 !array_key_exists('currency', $this->transactionPayload) ||
@@ -58,12 +64,15 @@ class Commission extends Utility implements Commissionable
                   throw new \Exception('Invalid transaction payload');
             }
 
-            $rate       = $this->getRateByCurrency($this->transactionPayload['currency']);
+            $rate       = $this->getRateByCurrency(
+                $this->transactionPayload['currency'],
+                json_decode($this->currencyRate->getRate(), true)
+            );
+
             $amount     = $this->generateAmount($rate);
-            $country    = $this->getCountries($json);
             $bins       = json_decode($this->getBin($this->transactionPayload));
 
-            $commission = $amount * ($country->isEU($bins->country->alpha2) ? $this->EURate : $this->nonEURate);
+            $commission = $amount * ($this->countries->isEU($bins->country->alpha2) ? $this->euRate : $this->nonEURate);
 
             // As an improvement, it should ceil commissions by cents.
             // For example, 0.46180... should become 0.47

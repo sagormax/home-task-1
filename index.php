@@ -12,7 +12,7 @@ foreach (explode("\n", file_get_contents($argv[1])) as $row) {
       if (empty($row)) break;
       $payload    = json_decode($row, true);
       $commission = new Commission($payload);
-      $commission->setEURate(EU_RATE);
+      $commission->setEuRate(EU_RATE);
       $commission->setNonEURate(NON_EU_RATE);
 
       try {

@@ -11,49 +11,45 @@ class UtilityTest extends TestCase
 {
       use Helper;
 
-      public function test_check_commission()
-      {
-            $commission = new Commission(["bin" => "516793","amount" => "50.00","currency" => "USD"]);
-            $commission->setEURate(0.01);
-            $commission->setNonEURate(0.02);
+      const BIN_LIST_ENDPOINT = 'https://lookup.binlist.net/';
+      const CURRENCY_RATE_ENDPOINT = 'https://api.exchangeratesapi.io/latest';
 
-            $amount = $commission->generateCommission($commission->getRemoteData(__DIR__ . '/../../eu.json'));
+      protected $rate;
+      protected $countries;
+
+      public function setUp(): void
+      {
+            $this->rate       = new CurrencyRate(self::CURRENCY_RATE_ENDPOINT);
+            $this->countries  = new Country(json_decode($this->getRemoteData(__DIR__ . '/../../eu.json')));
+      }
+
+      /** @test
+       * @throws Exception
+       */
+      public function check_commission_for_eu_countries()
+      {
+            $payload          = ["bin" => "516793","amount" => "50.00","currency" => "USD"];
+            $commission       = new Commission($payload, $this->rate, $this->countries);
+
+            $commission->setEuRate(0.01);
+
+            $amount = $commission->generate();
 
             $this->assertEquals($amount, 0.46);
       }
 
-      public function test_currency_rate()
+      /** @test
+       * @throws Exception
+       */
+      public function check_commission_for_non_eu_countries()
       {
-            $utility    = new Utility();
-            $rate       = $utility->getRateByCurrency('USD');
-            $this->assertEquals($rate, 1.0871);
-      }
+            $payload          = ["bin" => "45417360","amount" => "10000.00","currency" => "JPY"];
+            $commission       = new Commission($payload, $this->rate, $this->countries);
 
-      public function test_check_currency_rate_class()
-      {
-            $utility          = new Utility();
-            $currencyRate     = $utility->getCurrencyRate($utility::CURRENCY_RATE_ENDPOINT);
+            $commission->setNonEURate(0.02);
 
-            $this->assertInstanceOf(CurrencyRate::class, $currencyRate);
-      }
+            $amount = $commission->generate();
 
-      public function test_check_currency_rate_array_keys()
-      {
-            $utility          = new Utility();
-            $currencyRate     = json_decode(
-                $utility->getCurrencyRate($utility::CURRENCY_RATE_ENDPOINT)->getRate(),
-                true
-            );
-
-            $this->assertArrayHasKey('rates', $currencyRate);
-      }
-
-      public function test_is_eu_country()
-      {
-            $countries  = json_decode($this->getRemoteData(__DIR__ . '/../../eu.json'), true);
-            $country    = new Country($countries);
-
-            $this->assertEquals($country->isEU('abc'), false);
-            $this->assertEquals($country->isEU('cy'), true);
+            $this->assertEquals($amount, 1.69);
       }
 }

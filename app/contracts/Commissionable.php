@@ -6,9 +6,9 @@ namespace TrxCommission\contracts;
 
 interface Commissionable
 {
-      public function setEURate($rate);
+      public function setEuRate($rate);
 
       public function setNonEURate($rate);
 
-      public function generateCommission($json);
+      public function generate();
 }
