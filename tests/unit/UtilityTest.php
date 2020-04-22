@@ -1,7 +1,6 @@
 <?php
 
 use \TrxCommission\Helper;
-use \TrxCommission\Utility;
 use \TrxCommission\Country;
 use \TrxCommission\Commission;
 use \PHPUnit\Framework\TestCase;
